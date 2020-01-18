@@ -1,139 +1,133 @@
-import pygame, sys, time
-from pygame.constants import *
-from random import randint
+# course: ICS3 U1-01
+# exercise: Pygame culminating assignment
+# date: 2019-12-06
+# student number: 349612614
+# name: Marco Pasqua
+# description: a basic start-up program
+#
+#   ______  ___                               ________
+# ___   |/  /_____ ___________________      ___  __ \_____ _____________ ____  _______ _
+# __  /|_/ /_  __ `/_  ___/  ___/  __ \     __  /_/ /  __ `/_  ___/  __ `/  / / /  __ `/
+# _  /  / / / /_/ /_  /   / /__ / /_/ /     _  ____// /_/ /_(__  )/ /_/ // /_/ // /_/ /
+# /_/  /_/  \__,_/ /_/    \___/ \____/      /_/     \__,_/ /____/ \__, / \__,_/ \__,_/
+#                                                                   /_/
 
+
+import pygame, sys, time,random
+from pygame.constants import *
 pygame.init()
 
-# setting the size of the board
-w, h = 800, 600
-screen = pygame.display.set_mode((w, h))
-# Naming the window
-pygame.display.set_caption("Snake")
+#Setting the area for the board
+screen = w,h = 800, 600
+#Setting borders
+board = pygame.display.set_mode(screen)
+pygame.display.set_caption("Snake, Pygame culminating - Pasqua, Marco")
 
-# Spawn point for the snake
-snake_point_x = int(w / 2)
-snake_point_y = int(h / 2)
+#colours
+white = (255, 255, 255)
+red = (255, 0, 0)
+green = (0, 255, 0)
+black = (0, 0, 0)
 
-# Colour variables
-red = pygame.Color(255, 51, 0)
-green = pygame.Color(102, 255, 51)
-blue = pygame.Color(0, 153, 255)
-black = pygame.Color(0, 0, 0)
-white = pygame.Color(255, 255, 255)
-
-# Storing the colour variables in a list that the snake will use. Including black and white so when the user losses the snake will flash on the screen with black and white
-snake_colours = (red, green, blue, white)
-
-snake = [[snake_point_x, snake_point_y], [snake_point_x - 1, snake_point_y], [snake_point_x - 2, snake_point_y]]
-
-# Making a variable similar to count that will increase the length of the snake.
-length_snake = len(snake)
-
-
-# Function for drawing pellets
-def pellet(screen, x, y, s, c):
-    """pellet(screen, x, y, s, x) : Draws the pellet on the board that the snake is moving on."""
-    pygame.draw.rect(screen, c, (int(x * s), int(y * s), int(s), int(s)))
-
-
-# FPS setting
+#Setting variable for fps
 fpsClock = pygame.time.Clock()
 
-# X and y directions
+#Setting for the game
+#Snake speed
+speed = 10
 x_dir = -1
 y_dir = 0
-# Snake's speed
-speed = 10
+#Spawn point for the part of the snake that is controlled by the player
+snake_Pos = [400, 300]
+#Position for the rest of the snake's body
+snake_Body = [[390, 300], [380, 300], [370, 300]]
+#Spawn point for the first piece of fruit
+fruit = [300, 50]
+#Variable for spawning fruit
+fruit_Spawn = True
+#Score variable is being used to count the player's score
+score = 0
 
-# Board size
-board_w = w / speed
-board_h = h / speed
-# Starting area for the snake
-snake_start_x = board_w / 2
-snake_start_y = board_h / 2
+#Function for game over
+def GameOver():
+    """GameOver() : Will display the text that I put saying game over on top of the screen with the player's score and will stop the program """
+    font = pygame.font.SysFont("monaco", 32)
+    #Displays the string game over on the screen
+    go_surf = font.render("Game over", True, red)
+    #Draws a rectangle that allows the string to be displayed over the game
+    go_rect = go_surf.get_rect()
+    #allows the rectangle that is being drawn that displays the word Game over to be moved
+    go_rect.midtop = (320,25)
+    board.blit(go_surf, go_rect)
+    Score(0)
+    pygame.display.update()
+    time.sleep(3)
+    pygame.quit()
+    sys.exit(0)
 
-# Coordinates for snake
-snake = [[snake_start_x, snake_start_y], [snake_start_x - 1, snake_start_y], [snake_start_x - 2, snake_start_y]]
+#Function for showing the score
+def Score(choice=1):
+    score_font =  pygame.font.SysFont('monaco', 32)
+    score_surf = score_font.render("score : [0]".format(score), True, white)
+    score_rect = score_surf.get_rect()
+    if choice == 1:
+        score_rect.midtop = (80, 10)
+    else:
+        score_rect.midtop = (320, 100)
+    board.blit(score_surf, score_rect)
 
-# Creating speed for snake to move
-speed = 10
-
-done = False
-screen.fill(black)
-# Randomizing where the fruit will spawn
-fruit = (randint(2, board_w - 2), randint(2, board_h - 2))
-print(fruit)
-pellet(screen, fruit[0], fruit[1], speed, red)
-
-while not done:
-    # Filling the screen black to have a dark mode version of snake
-    screen.fill(pygame.Color(0, 0, 0))
+while True:
     for event in pygame.event.get():
         if (event.type == KEYDOWN):
             if (event.key == K_ESCAPE):
-                done = True
-            if (event.key == K_UP):
+                pygame.quit()
+                sys.exit(0)
+            if (event.key == K_UP or event.key == K_w):
                 if y_dir == 0:
                     y_dir = -1
                     x_dir = 0
-            if (event.key == K_DOWN):
+            if (event.key == K_DOWN or event.key == K_s):
                 if y_dir == 0:
-                    y_dir = 1
+                    y_dir = -1
                     x_dir = 0
-            if (event.key == K_RIGHT):
-                if x_dir == 0:
-                    x_dir = 1
-                    y_dir = 0
-            if (event.key == K_LEFT):
-                if x_dir == 0:
-                    x_dir = -1
-                    y_dir = 0
+            if (event.key == K_RIGHT or event.key == K_d):
+                if y_dir == 0:
+                    y_dir = -1
+                    x_dir = 0
+            if (event.key == K_LEFT or event.key == K_a):
+                if y_dir == 0:
+                    y_dir = -1
+                    x_dir = 0
+    #Snake body mechanics
+    snake_Body.insert(0, list(snake_Pos))
+    if snake_Pos == fruit:
+        fruit_Spawn = False
+        score += 1
+    else:
+        # Allows the snake's body to continue
+        snake_Body.pop()
+    if fruit_Spawn == False:
+        fruit = [random.randrange(1, w // 10) * speed, random.randrange(1, h // 10) * speed]
+        fruit_Spawn = True
+        
+    board.fill(black)
+    for pos in snake_Body:
+        pygame.draw.rect(board, green, pygame.Rect(pos[0], pos[1], speed, speed))
+    pygame.draw.rect(board, red, pygame.Rect(fruit[0], fruit[1], speed, speed))
 
-    pellet(screen, snake[0][0], snake[0][1], speed, red)
-    new_x = snake[-1][0] + x_dir
-    new_y = snake[-1][1] + y_dir
-    print(snake, new_x, new_y)
-    print("---")
+    #Setting Boundaries
+    if snake_Pos[0] >= w or snake_Pos[0] < 0:
+        print("condition 1")
+        GameOver()
+    if snake_Pos[1] >= h or snake_Pos[1] < 0:
+        print("condition 2")
+        GameOver()
 
-    # Code for making the pellets spawning on the screen each time the snake eats them
-    if new_x == fruit[0] and new_y == fruit[1]:
-        length_snake += 1
-        fruit = (randint(2, board_w - 2), randint(2, board_h - 2))
-        pellet(screen, fruit[0], fruit[1], speed, red)
-
-    for i in range(len(snake)):
-        if snake[i][0] == new_x and snake[i][1] == new_y:
-            print('exit', snake)
-            done = True
-
-    snake.append([snake[-1][0] + x_dir, snake[-1][1] + y_dir])
-
-    if snake[-1][0] >= board_w - 1:
-        snake[-1][0] = 1
-        length_snake += 1
-    elif snake[-1][0] < 1:
-        snake[-1][0] = board_w - 2
-        length_snake += 1
-
-    if snake[-1][1] >= board_h - 1:
-        snake[-1][1] = 1
-        length_snake += 1
-    elif snake[-1][1] < 1:
-        snake[-1][1] = board_h - 2
-        length_snake += 1
-
-    pellet(screen, snake[-1][0], snake[-1][1], speed, snake_colours[length_snake % len(snake_colours)])
-
-    # window is not drawn until the update command is called
-
-    fpsClock.tick(30)
-    for i in range(len(snake)):
-        pellet(screen, snake[i][0], snake[i][1], speed, red)
-        pygame.display.update()
-        # How fast the snake disappears from the screen when the player loses
-        fpsClock.tick(24)
+    #If player were to hit themself
+    for hit in snake_Body[1:]:
+        if snake_Pos == hit:
+            print("condition 3")
+            GameOver()
+    Score()
     pygame.display.update()
-# How long it takes for the window to close
-time.sleep(.8)
-# Quit the program
-sys.exit(0)
+    fpsClock.tick(24)
